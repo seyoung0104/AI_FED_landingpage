@@ -2542,6 +2542,7 @@
         const expandAnalysis = document.getElementById('expandAnalysis');
         let demoDetailChart;
         let demoDetailAnimationFrame;
+        let demoDetailRestartTimeout;
         let activeDemoKey = 'apr2026';
 
         function countWords(text) {
@@ -2705,6 +2706,10 @@
                 cancelAnimationFrame(demoDetailAnimationFrame);
                 demoDetailAnimationFrame = null;
             }
+            if (demoDetailRestartTimeout) {
+                clearTimeout(demoDetailRestartTimeout);
+                demoDetailRestartTimeout = null;
+            }
         }
 
         function revealTrajectory(series, visibleCount) {
@@ -2714,10 +2719,19 @@
         function animateDemoDetailChart(trajectory) {
             stopDemoDetailAnimation();
             const total = trajectory.labels.length;
-            const step = Math.max(3, Math.ceil(total / 72));
+            const step = Math.max(1, Math.ceil(total / 160));
             let visibleCount = 0;
+            let lastFrameTime = 0;
+            const frameDelay = 38;
+            const restartDelay = 5000;
 
-            const draw = () => {
+            const draw = (timestamp) => {
+                if (timestamp - lastFrameTime < frameDelay) {
+                    demoDetailAnimationFrame = requestAnimationFrame(draw);
+                    return;
+                }
+
+                lastFrameTime = timestamp;
                 visibleCount = Math.min(total, visibleCount + step);
                 demoDetailChart.data.datasets[0].data = revealTrajectory(trajectory.raise, visibleCount);
                 demoDetailChart.data.datasets[1].data = revealTrajectory(trajectory.hold, visibleCount);
@@ -2728,10 +2742,16 @@
                     demoDetailAnimationFrame = requestAnimationFrame(draw);
                 } else {
                     demoDetailAnimationFrame = null;
+                    demoDetailRestartTimeout = setTimeout(() => {
+                        visibleCount = 0;
+                        lastFrameTime = 0;
+                        demoDetailRestartTimeout = null;
+                        demoDetailAnimationFrame = requestAnimationFrame(draw);
+                    }, restartDelay);
                 }
             };
 
-            draw();
+            demoDetailAnimationFrame = requestAnimationFrame(draw);
         }
 
         function renderDemoDetailChart(animate = false) {
