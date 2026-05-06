@@ -1,0 +1,2632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-FED — Decode the Federal Reserve</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0b1120;
+            --bg2: #111827;
+            --bg3: #1a2236;
+            --bg4: #1e2d45;
+            --surface: #1e293b;
+            --surface2: #243047;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --blue-glow: rgba(59, 130, 246, 0.15);
+            --green: #22c55e;
+            --yellow: #eab308;
+            --text: #f0f4ff;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(59, 130, 246, 0.25);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 64px;
+            background: rgba(11, 17, 32, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--blue-light);
+            letter-spacing: -0.3px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: var(--text2);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a.active {
+            color: var(--blue-light);
+            border-bottom: 1.5px solid var(--blue-light);
+            padding-bottom: 2px;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .btn-demo {
+            background: var(--blue);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .btn-demo:hover {
+            background: var(--blue-light);
+            transform: translateY(-1px);
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 78px 24px 38px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 17px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0;
+            color: rgba(240, 244, 255, 0.72);
+            margin-bottom: 38px;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .hero h1 {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: clamp(52px, 6.35vw, 88px);
+            line-height: 1.03;
+            letter-spacing: 0;
+            color: #dbe6ff;
+            max-width: 1190px;
+            margin-bottom: 26px;
+        }
+
+        .hero h1 span {
+            color: #93c5fd;
+        }
+
+        .hero p {
+            color: rgba(219, 230, 255, 0.82);
+            font-size: 27px;
+            max-width: 920px;
+            margin-bottom: 50px;
+            line-height: 1.32;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #7dbcf7 0%, #2d9df0 100%);
+            color: #0d2f4b;
+            border: none;
+            min-width: 223px;
+            min-height: 77px;
+            padding: 20px 32px;
+            border-radius: 8px;
+            font-size: 23px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, #93c5fd 0%, #38a8f7 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.82);
+            color: #dbe6ff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            min-width: 309px;
+            min-height: 77px;
+            padding: 20px 32px;
+            border-radius: 8px;
+            font-size: 23px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .terminal-section {
+            padding: 0 48px 80px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .terminal-window {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 7px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red {
+            background: #ff5f57;
+        }
+
+        .dot-yellow {
+            background: #febc2e;
+        }
+
+        .dot-green {
+            background: #28c840;
+        }
+
+        .terminal-title {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            color: var(--text2);
+            text-transform: uppercase;
+        }
+
+        .terminal-legend {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .legend-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .ld-raise {
+            background: var(--blue);
+        }
+
+        .ld-hold {
+            background: var(--yellow);
+        }
+
+        .ld-cut {
+            background: var(--green);
+        }
+
+        .lc-raise {
+            color: var(--blue-light);
+        }
+
+        .lc-hold {
+            color: var(--yellow);
+        }
+
+        .lc-cut {
+            color: var(--green);
+        }
+
+        .terminal-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding: 28px;
+            gap: 24px;
+        }
+
+        .t-panel-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .t-panel-meta {
+            font-size: 11px;
+            color: var(--text3);
+        }
+
+        .t-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .t-raise {
+            color: var(--blue-light);
+        }
+
+        .t-dive {
+            color: #22d3ee;
+        }
+
+        .chart-container {
+            height: 200px;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .conviction-bar {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .conviction-label {
+            color: var(--text2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .conviction-val {
+            color: var(--green);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .deep-dive {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 14px;
+            color: var(--text2);
+            line-height: 1.8;
+            overflow-y: auto;
+            max-height: 280px;
+        }
+
+        .deep-dive p {
+            margin-bottom: 16px;
+        }
+
+        .hl-yellow {
+            color: var(--yellow);
+            text-decoration: underline;
+            text-decoration-color: rgba(234, 179, 8, 0.5);
+        }
+
+        .hl-green {
+            color: var(--green);
+            text-decoration: underline;
+            text-decoration-color: rgba(34, 197, 94, 0.5);
+        }
+
+        .sem-footer {
+            font-size: 10px;
+            letter-spacing: 1.2px;
+            color: var(--text3);
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        section {
+            padding: 120px 48px;
+        }
+
+        .feat-split {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .feature-showcase {
+            padding: 28px 48px 22px;
+            border-top: 1px solid rgba(148, 163, 184, 0.13);
+            background:
+                radial-gradient(circle at 12% 24%, rgba(59, 130, 246, 0.08), transparent 34%),
+                linear-gradient(180deg, rgba(15, 23, 42, 0.34), rgba(11, 17, 32, 0));
+        }
+
+        .feature-showcase+.feature-showcase {
+            padding-top: 16px;
+        }
+
+        .feature-showcase .feat-split {
+            max-width: 1020px;
+            gap: 44px;
+            grid-template-columns: 1.08fr 1fr;
+        }
+
+        .feature-copy {
+            max-width: 460px;
+        }
+
+        .feat-split.reverse {
+            direction: rtl;
+        }
+
+        .feat-split.reverse>* {
+            direction: ltr;
+        }
+
+        .feat-tag {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue-light);
+            margin-bottom: 16px;
+        }
+
+        .feature-showcase .feat-tag {
+            margin-bottom: 10px;
+        }
+
+        .feat-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: clamp(24px, 3vw, 38px);
+            letter-spacing: -1px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .feature-showcase .feat-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: clamp(30px, 3.3vw, 40px);
+            letter-spacing: 0;
+            margin-bottom: 16px;
+        }
+
+        .feature-rule {
+            width: 40px;
+            height: 2px;
+            background: var(--blue-light);
+            margin: 0 0 20px;
+        }
+
+        .feat-desc {
+            color: var(--text2);
+            font-size: 16px;
+            line-height: 1.75;
+            margin-bottom: 28px;
+        }
+
+        .feature-showcase .feat-desc {
+            font-size: 17px;
+            line-height: 1.62;
+            margin-bottom: 22px;
+        }
+
+        .feat-checks {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feat-checks li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            color: var(--text2);
+        }
+
+        .feature-showcase .feat-checks li {
+            font-size: 17px;
+            color: rgba(219, 230, 255, 0.76);
+        }
+
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1.5px solid var(--green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .check-icon::after {
+            content: '';
+            width: 8px;
+            height: 5px;
+            border-left: 1.5px solid var(--green);
+            border-bottom: 1.5px solid var(--green);
+            transform: rotate(-45deg) translate(1px, -1px);
+            display: block;
+        }
+
+        .viz-frame {
+            background: #070d18;
+            border-radius: 14px;
+            overflow: hidden;
+            position: relative;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .feature-showcase .viz-frame,
+        .feature-showcase .semantic-panel {
+            min-height: 292px;
+            border-radius: 12px;
+            padding: 24px;
+            background:
+                radial-gradient(circle at 85% 20%, rgba(59, 130, 246, 0.12), transparent 36%),
+                rgba(8, 14, 25, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.45);
+        }
+
+        .viz-frame .chart-container {
+            height: 260px;
+        }
+
+        .feature-showcase .viz-frame .chart-container {
+            height: 186px;
+        }
+
+        .viz-card-tag {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--blue-light);
+            margin-bottom: 4px;
+        }
+
+        .viz-card-title {
+            font-size: 23px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 14px;
+        }
+
+        .viz-legend {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 12px;
+            color: rgba(219, 230, 255, 0.78);
+            font-size: 14px;
+        }
+
+        .viz-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .viz-legend .legend-dot {
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .semantic-panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .feature-showcase .semantic-panel {
+            overflow: hidden;
+        }
+
+        .sp-bar {
+            background: var(--surface);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sp-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .feature-showcase .sp-body {
+            display: block;
+            padding: 0;
+        }
+
+        .sp-mini-chart {
+            background: #0a1628;
+            border-radius: 8px;
+            height: 120px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: var(--text3);
+            overflow: hidden;
+        }
+
+        .sp-logit-badge {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        .sp-conviction {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+        }
+
+        .sp-text {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.8;
+        }
+
+        .feature-showcase .sp-text {
+            background: rgba(30, 41, 59, 0.78);
+            border-radius: 8px;
+            border-left: 3px solid var(--blue-light);
+            border-bottom-left-radius: 4px;
+            border-top-left-radius: 4px;
+            padding: 14px 14px 14px 12px;
+            font-size: 15px;
+            line-height: 1.55;
+        }
+
+        .feature-showcase .sp-text p {
+            margin-bottom: 10px;
+        }
+
+        .feature-showcase .sp-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .hl-blue,
+        .hl-neutral {
+            border-radius: 4px;
+            padding: 0 4px;
+            color: #dbeafe;
+        }
+
+        .hl-blue {
+            background: rgba(59, 130, 246, 0.52);
+        }
+
+        .hl-neutral {
+            background: rgba(234, 179, 8, 0.42);
+        }
+
+        .feature-showcase .hl-yellow,
+        .feature-showcase .hl-green {
+            border-radius: 4px;
+            padding: 0 4px;
+            color: #f8fafc;
+            text-decoration: none;
+        }
+
+        .feature-showcase .hl-yellow {
+            background: rgba(234, 179, 8, 0.42);
+        }
+
+        .feature-showcase .hl-green {
+            background: rgba(34, 197, 94, 0.46);
+        }
+
+        .sp-bottom {
+            padding: 0 20px 16px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .bias-btn {
+            padding: 7px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.15s;
+        }
+
+        .feature-showcase .bias-btn {
+            min-width: 114px;
+            min-height: 38px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .semantic-showcase {
+            padding-bottom: 10px;
+        }
+
+        .semantic-showcase .feat-split {
+            max-width: 838px;
+            gap: 32px;
+            grid-template-columns: 1.1fr 0.9fr;
+        }
+
+        .semantic-showcase .semantic-panel {
+            min-height: 454px;
+            padding: 22px;
+        }
+
+        .semantic-showcase .viz-card-tag {
+            margin-bottom: 8px;
+        }
+
+        .semantic-showcase .viz-card-title {
+            font-size: 20px;
+            margin-bottom: 14px;
+        }
+
+        .semantic-showcase .viz-legend {
+            gap: 20px;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+
+        .semantic-showcase .sp-text {
+            background: rgba(30, 41, 59, 0.58);
+            border: 1px solid rgba(148, 163, 184, 0.08);
+            border-left: 0;
+            border-radius: 7px;
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.78;
+        }
+
+        .semantic-showcase .sp-text p {
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+        }
+
+        .semantic-showcase .sp-text p:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .curator-status {
+            margin-top: 14px;
+            color: var(--text3);
+            font-size: 11px;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .semantic-showcase .feature-copy {
+            max-width: 362px;
+        }
+
+        .semantic-showcase .feat-title {
+            font-size: clamp(34px, 3.8vw, 42px);
+            line-height: 1.08;
+            margin-bottom: 16px;
+        }
+
+        .semantic-copy-group {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .semantic-copy-group .feat-desc {
+            margin-bottom: 0;
+        }
+
+        .bias-card-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .bias-card {
+            min-height: 68px;
+            padding: 13px 10px;
+            border-radius: 6px;
+            background: rgba(8, 14, 25, 0.58);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            text-align: left;
+        }
+
+        .bias-card-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .bias-card p {
+            margin: 0;
+            font-size: 11px;
+            line-height: 1.3;
+            color: var(--text2);
+        }
+
+        .bias-card.hawkish p {
+            color: var(--blue-light);
+        }
+
+        .bias-card.dovish p {
+            color: #86efac;
+        }
+
+        .bias-card.neutral p {
+            color: #fde68a;
+        }
+
+        .semantic-callout {
+            max-width: 838px;
+            margin: 20px auto 0;
+            padding: 16px 18px;
+            border-radius: 7px;
+            background: rgba(15, 23, 42, 0.78);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .callout-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid rgba(96, 165, 250, 0.32);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .callout-icon::before,
+        .callout-icon::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            background: var(--blue-light);
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .callout-icon::before {
+            width: 14px;
+            height: 14px;
+        }
+
+        .callout-icon::after {
+            width: 5px;
+            height: 5px;
+            left: 62%;
+            top: 34%;
+            opacity: 0.8;
+        }
+
+        .semantic-callout strong {
+            display: block;
+            color: var(--text);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .semantic-callout span {
+            color: var(--text2);
+            font-size: 11px;
+        }
+
+        .bias-hawk {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--blue-light);
+        }
+
+        .bias-dove {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--green);
+        }
+
+        .bias-neutral {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text2);
+        }
+
+        .bias-btn:hover {
+            opacity: 0.8;
+        }
+
+        .synthesis-section {
+            background: var(--bg2);
+            padding: 120px 48px;
+            text-align: center;
+        }
+
+        .synthesis-section h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(28px, 3.5vw, 48px);
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .synthesis-section .sub {
+            color: var(--text2);
+            font-size: 17px;
+            margin-bottom: 60px;
+        }
+
+        .verdict-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: left;
+        }
+
+        .verdict-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .verdict-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--yellow);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .verdict-label {
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text3);
+        }
+
+        .verdict-decision {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--yellow);
+        }
+
+        .verdict-quote {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 24px;
+            font-style: italic;
+            font-size: 17px;
+            color: var(--text2);
+            line-height: 1.75;
+            margin-bottom: 24px;
+            border-left: 3px solid var(--blue);
+        }
+
+        .verdict-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .vstat {
+            background: var(--bg2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+        }
+
+        .vstat-label {
+            font-size: 10px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text3);
+            margin-bottom: 6px;
+        }
+
+        .vstat-val {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .vstat-val.green {
+            color: var(--green);
+        }
+
+        footer {
+            background: #050d19;
+            border-top: 1px solid rgba(148, 163, 184, 0.08);
+            padding: 30px 48px 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 32px;
+        }
+
+        footer .logo {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 800;
+            color: var(--text);
+            font-size: 20px;
+            letter-spacing: 0;
+            margin-bottom: 4px;
+        }
+
+        .footer-copy {
+            color: var(--text3);
+            font-size: 11px;
+            line-height: 1.45;
+            max-width: 230px;
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 44px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text3);
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .footer-links a:hover {
+            color: var(--blue-light);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+
+        .demo-section {
+            padding: 80px 48px 120px;
+            background: linear-gradient(180deg, var(--bg), var(--bg2));
+        }
+
+        .demo-shell {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .demo-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.18);
+        }
+
+        .demo-card h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 30px;
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .demo-card p {
+            color: var(--text2);
+            margin-bottom: 18px;
+        }
+
+        .demo-textarea {
+            width: 100%;
+            min-height: 230px;
+            resize: vertical;
+            background: #0a1020;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            line-height: 1.65;
+            outline: none;
+        }
+
+        .demo-textarea:focus {
+            border-color: var(--border2);
+            box-shadow: 0 0 0 4px var(--blue-glow);
+        }
+
+        .demo-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .demo-note {
+            font-size: 12px;
+            color: var(--text3);
+            margin-top: 12px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .prob-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .prob-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text3);
+            margin-bottom: 6px;
+        }
+
+        .prob-value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .prob-value.raise {
+            color: var(--blue-light);
+        }
+
+        .prob-value.hold {
+            color: var(--yellow);
+        }
+
+        .prob-value.cut {
+            color: var(--green);
+        }
+
+        .demo-progress {
+            height: 9px;
+            background: var(--bg);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-top: 12px;
+        }
+
+        .demo-progress span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--blue), var(--green));
+            transition: width 1.2s ease;
+        }
+
+        .loading-line {
+            color: var(--blue-light);
+            font-size: 13px;
+            min-height: 20px;
+            margin-top: 12px;
+        }
+
+        .fake-output {
+            background: #0a1020;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            color: var(--text2);
+            line-height: 1.75;
+            min-height: 178px;
+        }
+
+        .keyword-pill {
+            display: inline-flex;
+            margin: 3px 4px 3px 0;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .pill-hawk {
+            color: var(--blue-light);
+            background: rgba(59, 130, 246, 0.09);
+        }
+
+        .pill-hold {
+            color: var(--yellow);
+            background: rgba(234, 179, 8, 0.09);
+        }
+
+        .pill-dove {
+            color: var(--green);
+            background: rgba(34, 197, 94, 0.09);
+        }
+
+        .demo-hidden {
+            opacity: 0.45;
+        }
+
+        .demo-section.compact-demo {
+            padding: 72px 48px 86px;
+            background:
+                radial-gradient(circle at 26% 0%, rgba(59, 130, 246, 0.11), transparent 34%),
+                linear-gradient(180deg, var(--bg), #08101d);
+        }
+
+        .compact-demo .demo-shell {
+            max-width: 860px;
+            display: block;
+        }
+
+        .compact-demo .demo-card {
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+        }
+
+        .demo-topline {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        .compact-demo .feat-tag {
+            font-size: 9px;
+            letter-spacing: 1.2px;
+            margin-bottom: 5px;
+        }
+
+        .compact-demo .demo-card h2 {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 26px;
+            letter-spacing: 0;
+            margin-bottom: 8px;
+        }
+
+        .compact-demo .demo-card p {
+            max-width: 520px;
+            font-size: 14px;
+            line-height: 1.55;
+            margin-bottom: 0;
+        }
+
+        .demo-model-note {
+            color: var(--text3);
+            font-size: 10px;
+            line-height: 1.4;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            max-width: 220px;
+        }
+
+        .demo-model-note::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border: 1px solid var(--border2);
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .compact-demo .demo-textarea {
+            min-height: 136px;
+            border-radius: 4px;
+            padding: 14px;
+            background: rgba(8, 14, 25, 0.7);
+            color: var(--text);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .demo-input-wrap {
+            position: relative;
+        }
+
+        .demo-token-limit {
+            position: absolute;
+            right: 12px;
+            bottom: 10px;
+            color: var(--text3);
+            font-size: 11px;
+            pointer-events: none;
+        }
+
+        .compact-demo .demo-actions {
+            align-items: center;
+            margin-top: 14px;
+            gap: 10px;
+        }
+
+        .compact-demo .btn-primary,
+        .compact-demo .btn-secondary {
+            min-width: 0;
+            min-height: 34px;
+            padding: 9px 14px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .compact-demo .btn-primary {
+            color: #eaf4ff;
+            background: linear-gradient(180deg, #4ca9ff, #267fe8);
+        }
+
+        .compact-demo .btn-secondary {
+            color: var(--text2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .demo-archive {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 24px 0 18px;
+        }
+
+        .archive-label {
+            color: var(--text2);
+            font-size: 13px;
+            margin-right: 4px;
+        }
+
+        .archive-chip {
+            min-width: 88px;
+            padding: 9px 11px;
+            border-radius: 5px;
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            line-height: 1.15;
+            cursor: pointer;
+        }
+
+        .archive-chip.active {
+            color: var(--blue-light);
+            border-color: var(--border2);
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .archive-chip span {
+            display: block;
+            color: var(--text3);
+            font-size: 9px;
+            margin-top: 2px;
+        }
+
+        .expand-row {
+            display: flex;
+            justify-content: center;
+            margin: -4px 0 12px;
+        }
+
+        .expand-btn {
+            min-width: 184px;
+            min-height: 44px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.86);
+            color: var(--text2);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .expand-btn strong {
+            display: inline;
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .analysis-details {
+            display: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: rgba(8, 14, 25, 0.5);
+            padding: 16px;
+        }
+
+        .analysis-details.open {
+            display: block;
+        }
+
+        .detail-label {
+            color: var(--text3);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .detail-tabs {
+            display: flex;
+            gap: 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .detail-tab {
+            padding: 0 0 9px;
+            color: var(--text3);
+            font-size: 11px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .detail-tab.active {
+            color: var(--blue-light);
+            border-bottom-color: var(--blue-light);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .detail-card {
+            background: rgba(15, 23, 42, 0.74);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 14px;
+            min-height: 170px;
+        }
+
+        .detail-card-title {
+            color: var(--blue-light);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .detail-chart {
+            height: 310px;
+        }
+
+        .semantic-demo-output {
+            background: rgba(15, 23, 42, 0.74);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 18px;
+            margin-top: 14px;
+            color: var(--text2);
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .semantic-demo-output .hl-blue,
+        .semantic-demo-output .hl-yellow,
+        .semantic-demo-output .hl-green {
+            border-radius: 4px;
+            padding: 1px 4px;
+            color: #eef5ff;
+            text-decoration: none;
+        }
+
+        .semantic-demo-output .hl-blue {
+            background: rgba(59, 130, 246, 0.62);
+        }
+
+        .semantic-demo-output .hl-yellow {
+            background: rgba(234, 179, 8, 0.48);
+        }
+
+        .semantic-demo-output .hl-green {
+            background: rgba(34, 197, 94, 0.50);
+        }
+
+        .reason-list {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+            color: var(--text2);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .reason-list li {
+            display: grid;
+            grid-template-columns: 8px 1fr;
+            gap: 8px;
+        }
+
+        .reason-list i {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-top: 5px;
+        }
+
+        .detail-output-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .compact-demo .fake-output {
+            min-height: 164px;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.65;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 860px) {
+
+            .demo-shell,
+            .terminal-body,
+            .feat-split,
+            .sp-body {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                padding: 0 20px;
+            }
+
+            .nav-links {
+                gap: 14px;
+            }
+
+            section,
+            .demo-section,
+            .terminal-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .verdict-stats,
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-showcase {
+                padding: 42px 20px 28px;
+            }
+
+            .feature-showcase .feat-split {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+
+            .feature-copy {
+                max-width: none;
+            }
+
+            .semantic-showcase .feat-split {
+                grid-template-columns: 1fr;
+            }
+
+            .semantic-showcase .feature-copy {
+                max-width: none;
+            }
+
+            .bias-card-row {
+                grid-template-columns: 1fr;
+            }
+
+            .semantic-callout {
+                align-items: flex-start;
+            }
+
+            .demo-topline,
+            .semantic-callout {
+                flex-direction: column;
+            }
+
+            .detail-grid,
+            .detail-output-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .demo-archive {
+                align-items: stretch;
+            }
+
+            .hero {
+                padding-top: 96px;
+            }
+
+            .status-badge {
+                font-size: 12px;
+                margin-bottom: 28px;
+            }
+
+            .hero h1 {
+                font-size: clamp(40px, 12vw, 64px);
+            }
+
+            .hero p {
+                font-size: 20px;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: min(100%, 320px);
+                min-width: 0;
+                font-size: 19px;
+            }
+
+            .compact-demo .btn-primary,
+            .compact-demo .btn-secondary {
+                width: auto;
+                min-height: 34px;
+                font-size: 13px;
+            }
+        }
+
+        .model-output-body {
+            padding: 28px;
+            display: grid;
+            gap: 20px;
+        }
+
+        .model-answer-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.10), rgba(59, 130, 246, 0.06));
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .answer-line {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 0px;
+            margin-top: 8px;
+        }
+
+        .answer-cut {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .answer-meta {
+            color: var(--text3);
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .trajectory-card,
+        .reason-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .trajectory-large {
+            height: 300px;
+            margin-top: 18px;
+        }
+
+        .reason-card {
+            color: var(--text2);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .reason-card p {
+            margin-bottom: 14px;
+        }
+
+        .reason-conclusion {
+            color: var(--text);
+            font-weight: 600;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <a class="nav-logo" href="#">AI-FED</a>
+        <div class="nav-links">
+            <a href="#Overview" class="active">Overview</a>
+        </div>
+        <button class="btn-demo"
+            onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Demo</button>
+    </nav>
+
+    <section class="hero">
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            System Status: Live Analysis
+        </div>
+        <h1>See What the Fed is<br>Thinking, <span>Token by Token.</span></h1>
+        <p>Real-time action logit tracking and semantic highlighting for deep FOMC insights. Transform central bank
+            rhetoric into actionable data.</p>
+        <div class="hero-ctas">
+            <button class="btn-primary"
+                onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Analyze Now</button>
+            <button class="btn-secondary"
+                onclick="document.getElementById('Overview').scrollIntoView({behavior:'smooth'})">View
+                Documentation</button>
+        </div>
+    </section>
+
+    <div class="terminal-section" id="Overview">
+        <div class="terminal-window">
+
+            <div class="terminal-bar">
+                <div style="display:flex;align-items:center;gap:16px">
+                    <div class="terminal-dots">
+                        <div class="dot dot-red"></div>
+                        <div class="dot dot-yellow"></div>
+                        <div class="dot dot-green"></div>
+                    </div>
+                    <span class="terminal-title">AI-FED MODEL OUTPUT — STATEMENT_2025_09</span>
+                </div>
+
+                <div class="terminal-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot ld-raise"></div><span class="lc-raise">Raise</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot ld-hold"></div><span class="lc-hold">Hold</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot ld-cut"></div><span class="lc-cut">Cut</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="terminal-body">
+                <div>
+                    <div class="t-panel-header">
+                        <span class="t-panel-label t-raise">Logit Trajectory Analysis</span>
+                        <span class="t-panel-meta">Token 400 — 0.769 Probability</span>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="logitChart" role="img" aria-label="Logit trajectory chart">
+                            Logit trajectory: raise, hold, cut probability lines over tokens.
+                        </canvas>
+                    </div>
+
+                </div>
+
+                <div>
+                    <div class="t-panel-header">
+                        <span class="t-panel-label t-dive">Statement Deep-Dive</span>
+                        <span class="t-panel-meta">Para 4, Line 2</span>
+                    </div>
+
+                    <div class="deep-dive">
+                        <p>
+                            ...The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent
+                            over the longer run.
+                            The Committee judges that
+                            <span class="hl-yellow">the risks to achieving its goals are moving into better
+                                balance</span>...
+                        </p>
+
+                        <p>
+                            ...In support of its goals, the Committee decided to
+                            <span class="hl-yellow">maintain the target range for the federal funds rate</span>
+                            at 5-1/4 to 5-1/2 percent...
+                        </p>
+
+                        <p>
+                            ...The Committee does not expect it will be appropriate to
+                            <span class="hl-green">reduce the target range until it has gained greater confidence</span>
+                            that inflation is moving sustainably...
+                        </p>
+
+                        <div class="sem-footer">Semantic Inference Active</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="feature-showcase">
+        <div class="feat-split">
+            <div class="viz-frame">
+                <div class="viz-card-tag">Core Analytics</div>
+                <div class="viz-card-title">Precision Logit Tracking</div>
+                <div class="viz-legend">
+                    <span><i class="legend-dot ld-raise"></i>Raise</span>
+                    <span><i class="legend-dot ld-hold"></i>Hold</span>
+                    <span><i class="legend-dot ld-cut"></i>Cut</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="candleChart" role="img" aria-label="Logit tracking chart">Raise, hold, and cut logit
+                        tracking chart.</canvas>
+                </div>
+            </div>
+            <div class="feature-copy">
+                <div class="feat-tag">Core Analytics</div>
+                <h2 class="feat-title">Precision Logit Tracking</h2>
+                <div class="feature-rule"></div>
+                <p class="feat-desc">Track how the model's preference for 'Raise', 'Hold', and 'Cut' evolves across
+                    every token in the FOMC statement.</p>
+                <ul class="feat-checks">
+                    <li>
+                        <div class="check-icon"></div>Token-level preference trajectories
+                    </li>
+                    <li>
+                        <div class="check-icon"></div>Action-specific decision logits
+                    </li>
+                    <li>
+                        <div class="check-icon"></div>Real-time divergence detection
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-showcase semantic-showcase">
+        <div class="feat-split">
+            <div class="semantic-panel">
+                <div class="viz-card-tag">Semantic Engine</div>
+                <div class="viz-card-title">Semantic Context Highlighting</div>
+                <div class="viz-legend">
+                    <span><i class="legend-dot ld-raise"></i>Hawkish</span>
+                    <span><i class="legend-dot ld-cut"></i>Dovish</span>
+                    <span><i class="legend-dot ld-hold"></i>Neutral</span>
+                </div>
+                <div class="sp-body">
+                    <div class="sp-text">
+                        <p>...The Committee seeks to achieve <span class="hl-blue">maximum employment</span><br>and
+                            <span class="hl-blue">inflation</span> at the rate of 2 percent over the longer run.</p>
+                        <p>The Committee judges that <span class="hl-blue">the risks to achieving its goals</span> are
+                            <span class="hl-green">moving into better balance</span>...</p>
+                        <p>...In support of its goals, the Committee decided to <span class="hl-neutral">maintain the
+                                target range for the federal funds rate</span> at 5-1/4 to 5-1/2 percent...</p>
+                        <p>...The Committee does not expect it will be appropriate to <span class="hl-green">reduce the
+                                target range until it has gained greater confidence</span>...</p>
+                        <div class="curator-status">Digital Curator Active</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-copy">
+                <div class="feat-tag">Semantic Engine</div>
+                <h2 class="feat-title">Semantic Context Highlighting</h2>
+                <div class="feature-rule"></div>
+                <div class="semantic-copy-group">
+                    <p class="feat-desc">Our "Digital Curator" labels each phrase by its influence on the final policy
+                        preference.</p>
+                    <p class="feat-desc">Blue indicates upward pressure on rates, green indicates accommodation, and
+                        gray indicates neutral or holding.</p>
+                </div>
+                <div class="bias-card-row">
+                    <div class="bias-card hawkish">
+                        <div class="bias-card-title"><i class="legend-dot ld-raise"></i>Hawkish Bias</div>
+                        <p>Supports rate hikes</p>
+                    </div>
+                    <div class="bias-card dovish">
+                        <div class="bias-card-title"><i class="legend-dot ld-cut"></i>Dovish Bias</div>
+                        <p>Supports rate cuts</p>
+                    </div>
+                    <div class="bias-card neutral">
+                        <div class="bias-card-title"><i class="legend-dot ld-hold"></i>Neutral / Hold
+                        </div>
+                        <p>Mixed or minimal impact</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="semantic-callout">
+            <div class="callout-icon"></div>
+            <div>
+                <strong>From words to policy preference.</strong>
+                <span>We transform complex central bank communication into interpretable, action-specific signals.</span>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="demo-section compact-demo" id="demo">
+        <div class="demo-shell">
+            <div class="demo-card">
+                <div class="demo-topline">
+                    <div>
+                        <h2>Paste an FOMC-style statement</h2>
+                        <p>Analyze how the model interprets policy preference across every token.</p>
+                    </div>
+                </div>
+                <div class="demo-input-wrap">
+                    <textarea class="demo-textarea" id="statementInput"
+                        placeholder="Paste or type an FOMC-style statement here..."></textarea>
+                    <span class="demo-token-limit" id="tokenCount">0 / 4000</span>
+                </div>
+                <div class="demo-actions">
+                    <button class="btn-primary" id="runAnalysis">Analyze Statement</button>
+                    <button class="btn-secondary" id="clearStatement">Clear</button>
+                </div>
+                <div class="demo-archive">
+                    <span class="archive-label">FOMC Archive</span>
+                    <button class="archive-chip active" id="loadBase">2026 April</button>
+                    <button class="archive-chip" id="loadHawkish">2026 March</button>
+                    <button class="archive-chip" id="loadDovish">2026 January</button>
+                    <button class="archive-chip">2025 December</button>
+                    <button class="archive-chip">2025 October</button>
+                    <button class="archive-chip" id="loadSep2025">2025 September</button>
+                </div>
+                <div class="expand-row">
+                    <button class="expand-btn" id="expandAnalysis" aria-expanded="false">
+                        <strong>Expand Analysis</strong>
+                    </button>
+                </div>
+                <div class="fake-output" id="analysisOutput">
+                    Run the demo to generate a decision, highlighted keywords, and a short explanation.
+                </div>
+                <div class="analysis-details" id="analysisDetails">
+                    <div class="detail-grid">
+                        <div class="detail-card">
+                            <div class="detail-card-title">Token-Level Action Logit Trajectory</div>
+                            <div class="detail-chart">
+                                <canvas id="demoDetailChart" role="img"
+                                    aria-label="Token action logit trajectory"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="semantic-demo-output" id="semanticDemoOutput">
+                        Paste or load a statement, then run analysis to see action-colored phrasing.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div>
+            <div class="logo">AI-FED</div>
+            <div class="footer-copy">Preference-based interpretation of Federal Reserve communication.</div>
+        </div>
+        <div class="footer-links">
+            <a href="#">Paper</a>
+            <a href="#">Methodology</a>
+            <a href="#">GitHub</a>
+            <a href="#">Research Contact</a>
+        </div>
+    </footer>
+
+    <script>
+        const labels = Array.from({ length: 306 }, (_, i) => i);
+
+        function makeStatement202509LikeSeries() {
+            const raise = [];
+            const hold = [];
+            const cut = [];
+
+            for (let i = 0; i < labels.length; i++) {
+                let r, h, c;
+
+                if (i < 35) {
+                    r = 26 + i * 0.15;
+                    h = 30 - i * 0.16;
+                    c = 23 + i * 0.25;
+                } else if (i < 110) {
+                    r = 30 + Math.sin(i * 0.13) * 1.1;
+                    h = 24 + (i - 35) * 0.05 + Math.sin(i * 0.08) * 0.8;
+                    c = 30 + Math.sin(i * 0.10) * 0.8;
+                } else if (i < 125) {
+                    r = 29 - (i - 110) * 0.25;
+                    h = 28 - (i - 110) * 0.35;
+                    c = 30 + (i - 110) * 0.40;
+                } else {
+                    r = 25.5 + Math.sin(i * 0.08) * 0.5;
+                    h = 22.2 + Math.sin(i * 0.07) * 0.6;
+                    c = 34.2 + Math.sin(i * 0.09) * 0.7;
+                }
+
+                const noise = (seed) => Math.sin(i * seed) * 0.45 + Math.sin(i * seed * 0.37) * 0.25;
+
+                raise.push(r + noise(0.73));
+                hold.push(h + noise(0.91));
+                cut.push(c + noise(1.13));
+            }
+
+            return { raise, hold, cut };
+        }
+        const statementSeries = makeStatement202509LikeSeries();
+
+        function revealSeries(series, visibleCount) {
+            return series.map((value, index) => index < visibleCount ? value : null);
+        }
+
+        const logitChart = new Chart(document.getElementById('logitChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'raise (logit)',
+                        data: revealSeries(statementSeries.raise, 0),
+                        borderColor: '#3b82f6',
+                        tension: 0.15,
+                        pointRadius: 0,
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        label: 'hold (logit)',
+                        data: revealSeries(statementSeries.hold, 0),
+                        borderColor: '#f59e0b',
+                        tension: 0.15,
+                        pointRadius: 0,
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        label: 'cut (logit)',
+                        data: revealSeries(statementSeries.cut, 0),
+                        borderColor: '#22c55e',
+                        tension: 0.15,
+                        pointRadius: 0,
+                        borderWidth: 2.5,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                animation: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Token position (prefix encoding)',
+                            color: '#64748b',
+                            font: { size: 11 }
+                        },
+                        grid: { color: 'rgba(255,255,255,0.04)' },
+                        ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 8 }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Decision-slot logit',
+                            color: '#64748b',
+                            font: { size: 11 }
+                        },
+                        grid: { color: 'rgba(255,255,255,0.04)' },
+                        ticks: { color: '#64748b', font: { size: 10 } },
+                        min: 0,
+                        max: 37
+                    }
+                }
+            }
+        });
+
+        const fullSeries = {
+            raise: [...statementSeries.raise],
+            hold: [...statementSeries.hold],
+            cut: [...statementSeries.cut]
+        };
+
+        let drawIndex = 0;
+
+        function animateLogitDrawing() {
+            drawIndex += 2;
+
+            if (drawIndex > labels.length) {
+                drawIndex = 0;
+            }
+
+            logitChart.data.datasets[0].data = revealSeries(fullSeries.raise, drawIndex);
+            logitChart.data.datasets[1].data = revealSeries(fullSeries.hold, drawIndex);
+            logitChart.data.datasets[2].data = revealSeries(fullSeries.cut, drawIndex);
+
+            logitChart.update("none");
+        }
+
+        setInterval(animateLogitDrawing, 80);
+
+        const featureLabels = Array.from({ length: 101 }, (_, i) => i * 4);
+        const featureRaise = featureLabels.map((_, i) => {
+            if (i < 18) return -0.08 + Math.sin(i * 0.4) * 0.05;
+            if (i < 38) return 0.22 + Math.sin(i * 0.22) * 0.08;
+            if (i < 64) return 0.08 + Math.sin(i * 0.3) * 0.09;
+            return 0.14 + (i - 64) * 0.012 + Math.sin(i * 0.24) * 0.05;
+        });
+        const featureHold = featureLabels.map((_, i) => {
+            if (i < 24) return -0.08 + Math.sin(i * 0.28) * 0.04;
+            if (i < 66) return -0.28 + Math.sin(i * 0.2) * 0.06;
+            return -0.55 - (i - 66) * 0.012 + Math.sin(i * 0.22) * 0.04;
+        });
+        const featureCut = featureLabels.map((_, i) => {
+            if (i < 16) return 0.03 + Math.sin(i * 0.32) * 0.06;
+            if (i < 62) return 0.26 + Math.sin(i * 0.18) * 0.06;
+            return 0.40 + (i - 62) * 0.018 + Math.sin(i * 0.19) * 0.06;
+        });
+
+        new Chart(document.getElementById('candleChart'), {
+            type: 'line',
+            data: {
+                labels: featureLabels,
+                datasets: [
+                    { label: 'Raise', data: featureRaise, borderColor: '#3b82f6', tension: 0.25, pointRadius: 0, borderWidth: 2, fill: false },
+                    { label: 'Hold', data: featureHold, borderColor: '#f59e0b', tension: 0.25, pointRadius: 0, borderWidth: 2, fill: false },
+                    { label: 'Cut', data: featureCut, borderColor: '#22c55e', tension: 0.25, pointRadius: 0, borderWidth: 2.2, fill: false }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Token position', color: '#64748b', font: { size: 11 } },
+                        grid: { color: 'rgba(255,255,255,0.04)' },
+                        ticks: {
+                            color: '#64748b',
+                            font: { size: 10 },
+                            maxTicksLimit: 3,
+                            callback: function (value) {
+                                const label = this.getLabelForValue(value);
+                                return Number(label) === 400 ? '400+' : label;
+                            }
+                        }
+                    },
+                    y: {
+                        title: { display: true, text: 'Decision logit', color: '#64748b', font: { size: 11 } },
+                        min: -1.05,
+                        max: 1.1,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 5 }
+                    }
+                }
+            }
+        });
+
+
+        const demoSamples = {
+            base: "Recent indicators suggest that economic activity has continued to expand at a solid pace. Inflation remains somewhat elevated, and the Committee remains attentive to both sides of its mandate. The Committee will assess incoming data, the evolving outlook, and the balance of risks before adjusting the stance of monetary policy.",
+            sep2025: "Recent indicators suggest that growth of economic activity moderated in the first half of the year. Job gains have slowed, and the unemployment rate has edged up but remains low. Inflation has moved up and remains somewhat elevated. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. Uncertainty about the economic outlook remains elevated. The Committee is attentive to the risks to both sides of its dual mandate and judges that downside risks to employment have risen. In support of its goals and in light of the shift in the balance of risks, the Committee decided to lower the target range for the federal funds rate by 1/4 percentage point to 4 to 4-1/4 percent. In considering additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks. The Committee will continue reducing its holdings of Treasury securities and agency debt and agency mortgage-backed securities. The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective. In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook. The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals. The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.",
+            mar2026: "Available indicators suggest that economic activity has been expanding at a solid pace. Job gains have remained low, and the unemployment rate has been little changed in recent months. Inflation remains somewhat elevated. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. Uncertainty about the economic outlook remains elevated. The implications of developments in the Middle East for the U.S. economy are uncertain. The Committee is attentive to the risks to both sides of its dual mandate. In support of its goals, the Committee decided to maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent. In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks. The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective. In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook. The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals. The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.",
+            jan2026: "Available indicators suggest that economic activity has been expanding at a solid pace. Job gains have remained low, and the unemployment rate has shown some signs of stabilization. Inflation remains somewhat elevated. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. Uncertainty about the economic outlook remains elevated. The Committee is attentive to the risks to both sides of its dual mandate. In support of its goals, the Committee decided to maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent. In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks. The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective. In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook. The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals. The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.",
+            hawkish: "Recent indicators suggest that economic activity has expanded at a strong pace. Inflation remains elevated, and the Committee remains highly attentive to inflation risks. The Committee is prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of its goals.",
+            dovish: "Recent indicators suggest that growth has slowed and job gains have moderated. Inflation has eased over the past year, though it remains somewhat elevated. The Committee judges that the risks to achieving its employment and inflation goals are moving into better balance and may consider reducing the target range if confidence improves."
+        };
+
+        const statementInput = document.getElementById('statementInput');
+        const demoTokenCount = document.getElementById('tokenCount');
+        const analysisDetails = document.getElementById('analysisDetails');
+        const expandAnalysis = document.getElementById('expandAnalysis');
+        let demoDetailChart;
+        let activeDemoKey = 'base';
+
+        function countWords(text) {
+            const trimmed = text.trim();
+            return trimmed ? trimmed.split(/\s+/).length : 0;
+        }
+
+        function updateDemoTokenCount() {
+            demoTokenCount.textContent = `${countWords(statementInput.value)} / 4000`;
+        }
+
+        function makeStatement202601LikeSeries() {
+            const janLabels = Array.from({ length: 266 }, (_, i) => i);
+            const raise = [];
+            const hold = [];
+            const cut = [];
+
+            for (let i = 0; i < janLabels.length; i++) {
+                let r, h, c;
+
+                if (i < 10) {
+                    r = 26 + i * 0.7;
+                    h = 29 + Math.sin(i * 0.4) * 1.1;
+                    c = 24 + Math.sin(i * 0.5) * 1.0;
+                } else if (i < 25) {
+                    r = 34 - (i - 10) * 0.20 + Math.sin(i * 0.9) * 2.1;
+                    h = 24 + (i - 10) * 0.20 + Math.sin(i * 0.5) * 1.3;
+                    c = 22 + (i - 10) * 0.30 + Math.sin(i * 0.45) * 1.4;
+                } else if (i < 95) {
+                    r = 32.5 + Math.sin(i * 0.16) * 1.1;
+                    h = 21.5 + (i - 25) * 0.08 + Math.sin(i * 0.12) * 0.9;
+                    c = 28.5 + Math.sin(i * 0.10) * 0.7;
+                } else if (i < 112) {
+                    r = 27.5 + Math.sin(i * 0.9) * 1.5;
+                    h = 31 + (i - 95) * 0.17 + Math.sin(i * 0.7) * 2.0;
+                    c = 28 + Math.sin(i * 0.5) * 0.9;
+                } else {
+                    r = 28.5 + Math.sin(i * 0.10) * 0.6;
+                    h = 33.5 + Math.sin(i * 0.09) * 0.8;
+                    c = 28.2 + Math.sin(i * 0.11) * 0.7;
+                }
+
+                const noise = (seed) => Math.sin(i * seed) * 0.35 + Math.sin(i * seed * 0.31) * 0.18;
+                raise.push(r + noise(0.83));
+                hold.push(h + noise(0.97));
+                cut.push(c + noise(1.11));
+            }
+
+            return { labels: janLabels, raise, hold, cut };
+        }
+
+        const statement202601Series = makeStatement202601LikeSeries();
+
+        function makeStatement202603LikeSeries() {
+            const marLabels = Array.from({ length: 279 }, (_, i) => i);
+            const raise = [];
+            const hold = [];
+            const cut = [];
+
+            for (let i = 0; i < marLabels.length; i++) {
+                let r, h, c;
+
+                if (i < 8) {
+                    r = 26 + i * 0.45;
+                    h = 29 + Math.sin(i * 0.5) * 1.0;
+                    c = 24 + Math.sin(i * 0.4) * 0.8;
+                } else if (i < 20) {
+                    r = 32 + Math.sin(i * 1.1) * 2.4 + (i - 8) * 0.22;
+                    h = 25 - (i - 8) * 0.18 + Math.sin(i * 0.6) * 1.1;
+                    c = 23 + Math.sin(i * 0.7) * 1.7;
+                } else if (i < 36) {
+                    r = 31 - (i - 20) * 0.11 + Math.sin(i * 0.9) * 1.4;
+                    h = 27 + Math.sin(i * 0.7) * 1.2;
+                    c = 28 + Math.sin(i * 0.35) * 0.8;
+                } else if (i < 110) {
+                    r = 32.7 + Math.sin(i * 0.23) * 0.9 + Math.sin(i * 0.85) * 0.75;
+                    h = 22.5 + (i - 36) * 0.035 + Math.sin(i * 0.16) * 0.8;
+                    c = 28.6 + Math.sin(i * 0.14) * 0.7;
+                } else if (i < 134) {
+                    r = 29.2 + Math.sin(i * 0.9) * 1.5;
+                    h = 31.2 + Math.sin(i * 0.85) * 1.8;
+                    c = 28.6 + Math.sin(i * 0.7) * 1.1;
+                } else {
+                    r = 28.4 + Math.sin(i * 0.09) * 0.7 + Math.sin(i * 0.55) * 0.35;
+                    h = 33.1 + Math.sin(i * 0.08) * 0.8 + Math.sin(i * 0.52) * 0.55;
+                    c = 28.0 + Math.sin(i * 0.10) * 0.7 + Math.sin(i * 0.45) * 0.35;
+                }
+
+                const noise = (seed) => Math.sin(i * seed) * 0.32 + Math.sin(i * seed * 0.29) * 0.18;
+                raise.push(r + noise(0.79));
+                hold.push(h + noise(0.93));
+                cut.push(c + noise(1.07));
+            }
+
+            return { labels: marLabels, raise, hold, cut };
+        }
+
+        const statement202603Series = makeStatement202603LikeSeries();
+
+        function getActiveDemoTrajectory() {
+            if (activeDemoKey === 'mar2026') {
+                return statement202603Series;
+            }
+            if (activeDemoKey === 'jan2026') {
+                return statement202601Series;
+            }
+            return { labels, raise: statementSeries.raise, hold: statementSeries.hold, cut: statementSeries.cut };
+        }
+
+        function renderDemoDetailChart() {
+            const trajectory = getActiveDemoTrajectory();
+
+            if (demoDetailChart) {
+                demoDetailChart.data.labels = trajectory.labels;
+                demoDetailChart.data.datasets[0].data = trajectory.raise;
+                demoDetailChart.data.datasets[1].data = trajectory.hold;
+                demoDetailChart.data.datasets[2].data = trajectory.cut;
+                demoDetailChart.update("none");
+                demoDetailChart.resize();
+                return;
+            }
+
+            demoDetailChart = new Chart(document.getElementById('demoDetailChart'), {
+                type: 'line',
+                data: {
+                    labels: trajectory.labels,
+                    datasets: [
+                        { label: 'Raise', data: trajectory.raise, borderColor: '#60a5fa', tension: 0.15, pointRadius: 0, borderWidth: 2 },
+                        { label: 'Hold', data: trajectory.hold, borderColor: '#f59e0b', tension: 0.15, pointRadius: 0, borderWidth: 2 },
+                        { label: 'Cut', data: trajectory.cut, borderColor: '#22c55e', tension: 0.15, pointRadius: 0, borderWidth: 2.5 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, labels: { color: '#94a3b8', boxWidth: 8, font: { size: 10 } } } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Token position (prefix encoding)', color: '#64748b', font: { size: 10 } },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b', font: { size: 9 }, maxTicksLimit: 6 }
+                        },
+                        y: {
+                            title: { display: true, text: 'Decision logit', color: '#64748b', font: { size: 10 } },
+                            min: 0,
+                            max: 37,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b', font: { size: 9 }, maxTicksLimit: 5 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function scoreText(text) {
+            if (text === demoSamples.mar2026) {
+                return {
+                    raise: 0.29,
+                    hold: 0.47,
+                    cut: 0.24,
+                    hawkWords: ['been expanding at a solid pace', 'job gains have remained low', 'unemployment rate has been little changed', 'inflation remains somewhat elevated', 'uncertainty about the economic outlook remains elevated', 'economy are uncertain', 'risks to both sides of its dual mandate'],
+                    holdWords: ['maintain the target range', 'extent and timing of additional adjustments', 'carefully assess incoming data', 'evolving outlook', 'balance of risks', 'supporting maximum employment and returning inflation to its 2 percent objective', 'monitor the implications', 'prepared to adjust'],
+                    doveWords: []
+                };
+            }
+
+            if (text === demoSamples.jan2026) {
+                return {
+                    raise: 0.28,
+                    hold: 0.46,
+                    cut: 0.26,
+                    hawkWords: ['expanding at a solid pace', 'inflation remains somewhat elevated', 'uncertainty about the economic outlook remains elevated'],
+                    holdWords: ['maintain the target range', 'extent and timing of additional adjustments', 'carefully assess incoming data', 'evolving outlook', 'balance of risks', 'supporting maximum employment and returning inflation to its 2 percent objective', 'monitor the implications', 'prepared to adjust'],
+                    doveWords: ['job gains have remained low', 'unemployment rate has shown some signs of stabilization']
+                };
+            }
+
+            const lower = text.toLowerCase();
+            const hawkWords = ['elevated', 'inflation pressures', 'inflation expectations', 'prepared to adjust'];
+            const doveWords = ['growth of economic activity moderated', 'job gains have slowed', 'unemployment rate has edged up', 'downside risks to employment have risen', 'lower the target range', 'supporting maximum employment', 'labor market conditions', 'cut'];
+            const holdWords = ['balance of risks', 'carefully assess', 'incoming data', 'evolving outlook', 'monitor the implications', 'target range'];
+            let hawk = 0, dove = 0, hold = 0;
+            hawkWords.forEach(w => { if (lower.includes(w)) hawk += 1; });
+            doveWords.forEach(w => { if (lower.includes(w)) dove += 1; });
+            holdWords.forEach(w => { if (lower.includes(w)) hold += 1; });
+            const jitter = () => 0.01;
+            let raise = 0.18 + hawk * 0.06 - dove * 0.015 + jitter();
+            let cut = 0.24 + dove * 0.09 - hawk * 0.01 + jitter();
+            let stay = 0.28 + hold * 0.04 + jitter();
+            raise = Math.max(0.05, raise); cut = Math.max(0.05, cut); stay = Math.max(0.08, stay);
+            const sum = raise + cut + stay;
+            return { raise: raise / sum, hold: stay / sum, cut: cut / sum, hawkWords, doveWords, holdWords };
+        }
+
+        function pct(x) { return Math.round(x * 100); }
+
+        function highlightKeywords(text, words, cls) {
+            let found = [];
+            words.forEach(w => {
+                const re = new RegExp('\\b' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+                if (re.test(text)) found.push(`<span class="keyword-pill ${cls}">${w}</span>`);
+            });
+            return found.join('');
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
+        function colorStatementSignals(text, score) {
+            if (text === demoSamples.mar2026) {
+                return `<span class="hl-yellow">Available indicators suggest that economic activity has</span> <span class="hl-blue">been expanding at a solid pace. Job gains have remained low, and the unemployment rate</span> <span class="hl-blue">has been little changed in recent months.</span> <span class="hl-blue">Inflation remains somewhat elevated.</span> <span class="hl-blue">The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run.</span> <span class="hl-blue">Uncertainty about the economic outlook remains elevated.</span> <span class="hl-blue">The implications of developments in the Middle East for the U.S. economy are uncertain.</span> <span class="hl-blue">The Committee is attentive to the risks to both sides of its dual mandate.</span> In support of its goals, the Committee decided to <span class="hl-yellow">maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent.</span> <span class="hl-yellow">In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks.</span> <span class="hl-yellow">The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective.</span> <span class="hl-yellow">In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook.</span> <span class="hl-yellow">The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals.</span> <span class="hl-yellow">The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.</span>`;
+            }
+
+            if (text === demoSamples.jan2026) {
+                return `<span class="hl-blue">Available indicators suggest that economic activity has been expanding at a solid pace.</span> <span class="hl-blue">Job gains have remained low, and the unemployment rate has shown some signs of stabilization.</span> <span class="hl-blue">Inflation remains somewhat elevated.</span> <span class="hl-blue">The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run.</span> <span class="hl-blue">Uncertainty about the economic outlook remains elevated.</span> The Committee is attentive to the risks to both sides of its dual mandate. In support of its goals, the Committee <span class="hl-yellow">decided to maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent.</span> <span class="hl-yellow">In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks.</span> <span class="hl-yellow">The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective.</span> <span class="hl-yellow">In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook.</span> <span class="hl-yellow">The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals.</span> <span class="hl-yellow">The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.</span>`;
+            }
+
+            if (text === demoSamples.sep2025) {
+                return `<span class="hl-yellow">Recent indicators suggest that growth of economic activity moderated in the first half of the year.</span> <span class="hl-green">Job gains have slowed, and the unemployment rate has edged up but remains low.</span> <span class="hl-yellow">Inflation has moved up and remains somewhat elevated.</span> <span class="hl-blue">The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run.</span> <span class="hl-blue">Uncertainty about the economic outlook remains elevated.</span> <span class="hl-blue">The Committee is attentive to the risks to both sides of its dual mandate and judges that downside risks to employment have risen.</span> In support of its goals and in light of the shift in the balance of risks, the Committee <span class="hl-green">decided to lower the target range for the federal funds rate by 1/4 percentage point to 4 to 4-1/4 percent.</span> <span class="hl-green">In considering additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks.</span> <span class="hl-green">The Committee will continue reducing its holdings of Treasury securities and agency debt and agency mortgage-backed securities.</span> <span class="hl-green">The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective.</span> <span class="hl-green">In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook.</span> <span class="hl-green">The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals.</span> <span class="hl-green">The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.</span>`;
+            }
+
+            const signalGroups = [
+                { words: score.hawkWords, cls: 'hl-blue' },
+                { words: score.holdWords, cls: 'hl-yellow' },
+                { words: score.doveWords, cls: 'hl-green' }
+            ];
+            let highlighted = escapeHtml(text);
+
+            signalGroups.forEach(group => {
+                group.words
+                    .slice()
+                    .sort((a, b) => b.length - a.length)
+                    .forEach(word => {
+                        const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const re = new RegExp(`\\b(${escapedWord})\\b`, 'gi');
+                        highlighted = highlighted.replace(re, `<span class="${group.cls}">$1</span>`);
+                    });
+            });
+
+            return highlighted;
+        }
+
+        async function runDemoAnalysis() {
+            const text = statementInput.value.trim();
+            const output = document.getElementById('analysisOutput');
+            const semanticOutput = document.getElementById('semanticDemoOutput');
+            if (!text) {
+                output.innerHTML = 'Please paste a statement before running analysis.';
+                return;
+            }
+            updateDemoTokenCount();
+            output.classList.add('demo-hidden');
+            await new Promise(r => setTimeout(r, 450));
+            await new Promise(r => setTimeout(r, 550));
+            await new Promise(r => setTimeout(r, 500));
+
+            const s = scoreText(text);
+            const probs = [{ k: 'Raise', v: s.raise }, { k: 'Hold', v: s.hold }, { k: 'Cut', v: s.cut }].sort((a, b) => b.v - a.v);
+            const decision = probs[0].k;
+
+            const hawkPills = highlightKeywords(text, s.hawkWords, 'pill-hawk');
+            const holdPills = highlightKeywords(text, s.holdWords, 'pill-hold');
+            const dovePills = highlightKeywords(text, s.doveWords, 'pill-dove');
+            let explanation = decision === 'Raise'
+                ? 'The text contains stronger inflation-risk and restrictive-policy signals, so the simulated model leans hawkish.'
+                : decision === 'Cut'
+                    ? 'The document indicates that inflation has moved up and remains somewhat elevated, but also notes that downside risks to employment have risen and the unemployment rate has edged up. The Committee lowered the federal funds rate by 1/4 percentage point to support maximum employment and address the shift in risks, indicating a cautious easing stance amid uncertainties. Therefore, cutting the rate aligns with the Committee\'s response to mitigate downside risks while managing inflation.'
+                    : text === demoSamples.jan2026
+                        ? 'The document indicates that economic activity is expanding solidly but inflation remains somewhat elevated, and the unemployment rate shows stabilization. The Committee aims to keep rates steady while monitoring incoming data and balancing risks to both employment and inflation. There is no clear indication to raise or cut rates at this time, so maintaining the current target range is appropriate.'
+                        : text === demoSamples.mar2026
+                            ? 'The document indicates that economic activity has been expanding at a solid pace, while inflation remains somewhat elevated and uncertainty around the outlook persists. The Committee maintained the target range and emphasized assessing incoming data, the evolving outlook, and the balance of risks. The statement does not provide a decisive signal to raise or cut rates, so holding the current target range is appropriate.'
+                        : 'The text emphasizes balance, maintenance, and current target-range language, so the simulated model predicts a hold.';
+            output.innerHTML = `<strong style="color:var(--text)">[MODEL ANSWER]</strong><br>
+      Answer: <span class="hl-green">${decision.toLowerCase()}</span><br>
+      Reason: ${explanation}`;
+            semanticOutput.innerHTML = colorStatementSignals(text, s);
+            output.classList.remove('demo-hidden');
+            if (analysisDetails.classList.contains('open')) {
+                renderDemoDetailChart();
+            }
+        }
+
+        document.getElementById('runAnalysis').addEventListener('click', runDemoAnalysis);
+        document.getElementById('clearStatement').addEventListener('click', () => {
+            statementInput.value = '';
+            updateDemoTokenCount();
+            document.getElementById('analysisOutput').innerHTML = 'Run the demo to generate a decision, highlighted keywords, and a short explanation.';
+            document.getElementById('semanticDemoOutput').innerHTML = 'Paste or load a statement, then run analysis to see action-colored phrasing.';
+        });
+        function setArchiveSample(buttonId, sample, sampleKey = 'base') {
+            document.querySelectorAll('.archive-chip').forEach(button => button.classList.remove('active'));
+            document.getElementById(buttonId).classList.add('active');
+            activeDemoKey = sampleKey;
+            statementInput.value = sample;
+            updateDemoTokenCount();
+            document.getElementById('analysisOutput').innerHTML = 'Run the demo to generate a decision, highlighted keywords, and a short explanation.';
+            document.getElementById('semanticDemoOutput').innerHTML = 'Paste or load a statement, then run analysis to see action-colored phrasing.';
+            if (demoDetailChart) {
+                renderDemoDetailChart();
+            }
+        }
+
+        document.getElementById('loadBase').addEventListener('click', () => setArchiveSample('loadBase', demoSamples.base));
+        document.getElementById('loadHawkish').addEventListener('click', () => setArchiveSample('loadHawkish', demoSamples.mar2026, 'mar2026'));
+        document.getElementById('loadDovish').addEventListener('click', () => setArchiveSample('loadDovish', demoSamples.jan2026, 'jan2026'));
+        document.getElementById('loadSep2025').addEventListener('click', () => setArchiveSample('loadSep2025', demoSamples.sep2025, 'sep2025'));
+        statementInput.addEventListener('input', updateDemoTokenCount);
+        expandAnalysis.addEventListener('click', () => {
+            const isOpen = analysisDetails.classList.toggle('open');
+            expandAnalysis.setAttribute('aria-expanded', String(isOpen));
+            expandAnalysis.querySelector('strong').textContent = isOpen ? 'Collapse Analysis' : 'Expand Analysis';
+            if (isOpen) {
+                renderDemoDetailChart();
+            }
+        });
+        statementInput.value = demoSamples.base;
+        updateDemoTokenCount();
+
+    </script>
+</body>
+
+</html>
