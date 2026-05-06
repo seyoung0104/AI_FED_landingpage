@@ -30,4 +30,4 @@ st.markdown(
 html_path = Path(__file__).with_name("index.html")
 html = html_path.read_text(encoding="utf-8")
 
-components.html(html, height=3950, scrolling=True)
+components.html(html, height=3300, scrolling=True)
