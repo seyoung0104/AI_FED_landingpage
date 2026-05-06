@@ -2528,7 +2528,7 @@
 
 
         const demoSamples = {
-            base: "Recent indicators suggest that economic activity has continued to expand at a solid pace. Inflation remains somewhat elevated, and the Committee remains attentive to both sides of its mandate. The Committee will assess incoming data, the evolving outlook, and the balance of risks before adjusting the stance of monetary policy.",
+            base: "Recent indicators suggest that economic activity has been expanding at a solid pace. Job gains have remained low, on average, and the unemployment rate has been little changed in recent months. Inflation is elevated, in part reflecting the recent increase in global energy prices. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. Developments in the Middle East are contributing to a high level of uncertainty about the economic outlook. The Committee is attentive to the risks to both sides of its dual mandate. In support of its goals, the Committee decided to maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent. In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks. The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective. In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook. The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals. The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.",
             sep2025: "Recent indicators suggest that growth of economic activity moderated in the first half of the year. Job gains have slowed, and the unemployment rate has edged up but remains low. Inflation has moved up and remains somewhat elevated. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. Uncertainty about the economic outlook remains elevated. The Committee is attentive to the risks to both sides of its dual mandate and judges that downside risks to employment have risen. In support of its goals and in light of the shift in the balance of risks, the Committee decided to lower the target range for the federal funds rate by 1/4 percentage point to 4 to 4-1/4 percent. In considering additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks. The Committee will continue reducing its holdings of Treasury securities and agency debt and agency mortgage-backed securities. The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective. In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook. The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals. The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.",
             mar2026: "Available indicators suggest that economic activity has been expanding at a solid pace. Job gains have remained low, and the unemployment rate has been little changed in recent months. Inflation remains somewhat elevated. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. Uncertainty about the economic outlook remains elevated. The implications of developments in the Middle East for the U.S. economy are uncertain. The Committee is attentive to the risks to both sides of its dual mandate. In support of its goals, the Committee decided to maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent. In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks. The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective. In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook. The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals. The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.",
             jan2026: "Available indicators suggest that economic activity has been expanding at a solid pace. Job gains have remained low, and the unemployment rate has shown some signs of stabilization. Inflation remains somewhat elevated. The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run. Uncertainty about the economic outlook remains elevated. The Committee is attentive to the risks to both sides of its dual mandate. In support of its goals, the Committee decided to maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent. In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks. The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective. In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook. The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals. The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.",
@@ -2541,7 +2541,7 @@
         const analysisDetails = document.getElementById('analysisDetails');
         const expandAnalysis = document.getElementById('expandAnalysis');
         let demoDetailChart;
-        let activeDemoKey = 'base';
+        let activeDemoKey = 'apr2026';
 
         function countWords(text) {
             const trimmed = text.trim();
@@ -2594,6 +2594,52 @@
 
         const statement202601Series = makeStatement202601LikeSeries();
 
+        function makeStatement202604LikeSeries() {
+            const aprLabels = Array.from({ length: 286 }, (_, i) => i);
+            const raise = [];
+            const hold = [];
+            const cut = [];
+
+            for (let i = 0; i < aprLabels.length; i++) {
+                let r, h, c;
+
+                if (i < 8) {
+                    r = 26.5 + i * 0.42;
+                    h = 29.8 + Math.sin(i * 0.55) * 0.8;
+                    c = 24.0 + Math.sin(i * 0.42) * 0.75;
+                } else if (i < 19) {
+                    r = 33.0 + Math.sin(i * 1.08) * 2.45 + (i - 8) * 0.18;
+                    h = 25.0 - (i - 8) * 0.16 + Math.sin(i * 0.72) * 1.0;
+                    c = 23.1 + Math.sin(i * 0.72) * 1.65;
+                } else if (i < 39) {
+                    r = 30.1 + Math.sin(i * 0.88) * 1.1;
+                    h = 27.4 + Math.sin(i * 0.78) * 1.0;
+                    c = 28.3 + Math.sin(i * 0.38) * 0.95;
+                } else if (i < 116) {
+                    r = 33.2 + Math.sin(i * 0.21) * 0.95 + Math.sin(i * 0.92) * 0.7;
+                    h = 21.7 + (i - 39) * 0.032 + Math.sin(i * 0.15) * 0.75;
+                    c = 29.4 + Math.sin(i * 0.13) * 0.7;
+                } else if (i < 139) {
+                    r = 29.0 + Math.sin(i * 0.95) * 1.45;
+                    h = 29.7 + Math.sin(i * 0.90) * 2.0;
+                    c = 28.6 + Math.sin(i * 0.72) * 1.0;
+                } else {
+                    r = 28.4 + Math.sin(i * 0.10) * 0.65 + Math.sin(i * 0.55) * 0.35;
+                    h = 32.0 + Math.sin(i * 0.08) * 0.75 + Math.sin(i * 0.50) * 0.50;
+                    c = 28.1 + Math.sin(i * 0.10) * 0.7 + Math.sin(i * 0.43) * 0.35;
+                }
+
+                const noise = (seed) => Math.sin(i * seed) * 0.34 + Math.sin(i * seed * 0.28) * 0.18;
+                raise.push(r + noise(0.81));
+                hold.push(h + noise(0.95));
+                cut.push(c + noise(1.09));
+            }
+
+            return { labels: aprLabels, raise, hold, cut };
+        }
+
+        const statement202604Series = makeStatement202604LikeSeries();
+
         function makeStatement202603LikeSeries() {
             const marLabels = Array.from({ length: 279 }, (_, i) => i);
             const raise = [];
@@ -2641,6 +2687,9 @@
         const statement202603Series = makeStatement202603LikeSeries();
 
         function getActiveDemoTrajectory() {
+            if (activeDemoKey === 'apr2026') {
+                return statement202604Series;
+            }
             if (activeDemoKey === 'mar2026') {
                 return statement202603Series;
             }
@@ -2696,6 +2745,17 @@
         }
 
         function scoreText(text) {
+            if (text === demoSamples.base) {
+                return {
+                    raise: 0.30,
+                    hold: 0.48,
+                    cut: 0.22,
+                    hawkWords: ['been expanding at a solid pace', 'job gains have remained low, on average', 'unemployment rate has been little changed', 'inflation is elevated', 'recent increase in global energy prices', 'seeks to achieve maximum employment and inflation at the rate of 2 percent', 'developments in the Middle East are contributing to a high level of uncertainty', 'risks to both sides of its dual mandate'],
+                    holdWords: ['maintain the target range', 'extent and timing of additional adjustments', 'carefully assess incoming data', 'evolving outlook', 'balance of risks', 'supporting maximum employment and returning inflation to its 2 percent objective', 'monitor the implications', 'prepared to adjust', 'wide range of information'],
+                    doveWords: []
+                };
+            }
+
             if (text === demoSamples.mar2026) {
                 return {
                     raise: 0.29,
@@ -2757,6 +2817,10 @@
         }
 
         function colorStatementSignals(text, score) {
+            if (text === demoSamples.base) {
+                return `<span class="hl-yellow">Recent indicators suggest that economic activity has</span> <span class="hl-blue">been expanding at a solid pace. Job gains have remained low, on average, and</span> <span class="hl-blue">the unemployment rate has been little changed in recent months.</span> <span class="hl-blue">Inflation is elevated, in part reflecting the recent increase in global energy prices.</span> <span class="hl-blue">The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run.</span> <span class="hl-blue">Developments in the Middle East are contributing to a high level of uncertainty about the economic outlook.</span> <span class="hl-blue">The Committee is attentive to the risks to both sides of its dual mandate.</span> In support of its goals, the Committee decided to <span class="hl-yellow">maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent.</span> <span class="hl-yellow">In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks.</span> <span class="hl-yellow">The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective.</span> <span class="hl-yellow">In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook.</span> <span class="hl-yellow">The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals.</span> <span class="hl-yellow">The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.</span>`;
+            }
+
             if (text === demoSamples.mar2026) {
                 return `<span class="hl-yellow">Available indicators suggest that economic activity has</span> <span class="hl-blue">been expanding at a solid pace. Job gains have remained low, and the unemployment rate</span> <span class="hl-blue">has been little changed in recent months.</span> <span class="hl-blue">Inflation remains somewhat elevated.</span> <span class="hl-blue">The Committee seeks to achieve maximum employment and inflation at the rate of 2 percent over the longer run.</span> <span class="hl-blue">Uncertainty about the economic outlook remains elevated.</span> <span class="hl-blue">The implications of developments in the Middle East for the U.S. economy are uncertain.</span> <span class="hl-blue">The Committee is attentive to the risks to both sides of its dual mandate.</span> In support of its goals, the Committee decided to <span class="hl-yellow">maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent.</span> <span class="hl-yellow">In considering the extent and timing of additional adjustments to the target range for the federal funds rate, the Committee will carefully assess incoming data, the evolving outlook, and the balance of risks.</span> <span class="hl-yellow">The Committee is strongly committed to supporting maximum employment and returning inflation to its 2 percent objective.</span> <span class="hl-yellow">In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook.</span> <span class="hl-yellow">The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals.</span> <span class="hl-yellow">The Committee's assessments will take into account a wide range of information, including readings on labor market conditions, inflation pressures and inflation expectations, and financial and international developments.</span>`;
             }
@@ -2850,7 +2914,7 @@
             }
         }
 
-        document.getElementById('loadBase').addEventListener('click', () => setArchiveSample('loadBase', demoSamples.base));
+        document.getElementById('loadBase').addEventListener('click', () => setArchiveSample('loadBase', demoSamples.base, 'apr2026'));
         document.getElementById('loadHawkish').addEventListener('click', () => setArchiveSample('loadHawkish', demoSamples.mar2026, 'mar2026'));
         document.getElementById('loadDovish').addEventListener('click', () => setArchiveSample('loadDovish', demoSamples.jan2026, 'jan2026'));
         document.getElementById('loadSep2025').addEventListener('click', () => setArchiveSample('loadSep2025', demoSamples.sep2025, 'sep2025'));
