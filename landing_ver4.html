@@ -2541,6 +2541,7 @@
         const analysisDetails = document.getElementById('analysisDetails');
         const expandAnalysis = document.getElementById('expandAnalysis');
         let demoDetailChart;
+        let demoDetailAnimationFrame;
         let activeDemoKey = 'apr2026';
 
         function countWords(text) {
@@ -2699,16 +2700,58 @@
             return { labels, raise: statementSeries.raise, hold: statementSeries.hold, cut: statementSeries.cut };
         }
 
-        function renderDemoDetailChart() {
+        function stopDemoDetailAnimation() {
+            if (demoDetailAnimationFrame) {
+                cancelAnimationFrame(demoDetailAnimationFrame);
+                demoDetailAnimationFrame = null;
+            }
+        }
+
+        function revealTrajectory(series, visibleCount) {
+            return series.map((value, index) => index < visibleCount ? value : null);
+        }
+
+        function animateDemoDetailChart(trajectory) {
+            stopDemoDetailAnimation();
+            const total = trajectory.labels.length;
+            const step = Math.max(3, Math.ceil(total / 72));
+            let visibleCount = 0;
+
+            const draw = () => {
+                visibleCount = Math.min(total, visibleCount + step);
+                demoDetailChart.data.datasets[0].data = revealTrajectory(trajectory.raise, visibleCount);
+                demoDetailChart.data.datasets[1].data = revealTrajectory(trajectory.hold, visibleCount);
+                demoDetailChart.data.datasets[2].data = revealTrajectory(trajectory.cut, visibleCount);
+                demoDetailChart.update("none");
+
+                if (visibleCount < total) {
+                    demoDetailAnimationFrame = requestAnimationFrame(draw);
+                } else {
+                    demoDetailAnimationFrame = null;
+                }
+            };
+
+            draw();
+        }
+
+        function renderDemoDetailChart(animate = false) {
             const trajectory = getActiveDemoTrajectory();
+            const raiseData = animate ? revealTrajectory(trajectory.raise, 0) : trajectory.raise;
+            const holdData = animate ? revealTrajectory(trajectory.hold, 0) : trajectory.hold;
+            const cutData = animate ? revealTrajectory(trajectory.cut, 0) : trajectory.cut;
+
+            stopDemoDetailAnimation();
 
             if (demoDetailChart) {
                 demoDetailChart.data.labels = trajectory.labels;
-                demoDetailChart.data.datasets[0].data = trajectory.raise;
-                demoDetailChart.data.datasets[1].data = trajectory.hold;
-                demoDetailChart.data.datasets[2].data = trajectory.cut;
+                demoDetailChart.data.datasets[0].data = raiseData;
+                demoDetailChart.data.datasets[1].data = holdData;
+                demoDetailChart.data.datasets[2].data = cutData;
                 demoDetailChart.update("none");
                 demoDetailChart.resize();
+                if (animate) {
+                    animateDemoDetailChart(trajectory);
+                }
                 return;
             }
 
@@ -2717,9 +2760,9 @@
                 data: {
                     labels: trajectory.labels,
                     datasets: [
-                        { label: 'Raise', data: trajectory.raise, borderColor: '#60a5fa', tension: 0.15, pointRadius: 0, borderWidth: 2 },
-                        { label: 'Hold', data: trajectory.hold, borderColor: '#f59e0b', tension: 0.15, pointRadius: 0, borderWidth: 2 },
-                        { label: 'Cut', data: trajectory.cut, borderColor: '#22c55e', tension: 0.15, pointRadius: 0, borderWidth: 2.5 }
+                        { label: 'Raise', data: raiseData, borderColor: '#60a5fa', tension: 0.15, pointRadius: 0, borderWidth: 2 },
+                        { label: 'Hold', data: holdData, borderColor: '#f59e0b', tension: 0.15, pointRadius: 0, borderWidth: 2 },
+                        { label: 'Cut', data: cutData, borderColor: '#22c55e', tension: 0.15, pointRadius: 0, borderWidth: 2.5 }
                     ]
                 },
                 options: {
@@ -2742,6 +2785,9 @@
                     }
                 }
             });
+            if (animate) {
+                animateDemoDetailChart(trajectory);
+            }
         }
 
         function scoreText(text) {
@@ -2890,7 +2936,7 @@
             semanticOutput.innerHTML = colorStatementSignals(text, s);
             output.classList.remove('demo-hidden');
             if (analysisDetails.classList.contains('open')) {
-                renderDemoDetailChart();
+                renderDemoDetailChart(true);
             }
         }
 
@@ -2924,7 +2970,9 @@
             expandAnalysis.setAttribute('aria-expanded', String(isOpen));
             expandAnalysis.querySelector('strong').textContent = isOpen ? 'Collapse Analysis' : 'Expand Analysis';
             if (isOpen) {
-                renderDemoDetailChart();
+                renderDemoDetailChart(true);
+            } else {
+                stopDemoDetailAnimation();
             }
         });
         statementInput.value = demoSamples.base;
