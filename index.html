@@ -1757,6 +1757,245 @@
             }
         }
 
+        @media (max-width: 520px) {
+            nav {
+                height: 52px;
+                padding: 0 12px;
+            }
+
+            .nav-logo {
+                font-size: 15px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .btn-demo {
+                padding: 6px 10px;
+                border-radius: 8px;
+                font-size: 11px;
+            }
+
+            .hero {
+                min-height: auto;
+                padding: 76px 14px 34px;
+            }
+
+            .status-badge {
+                font-size: 11px;
+                padding: 5px 10px;
+                margin-bottom: 18px;
+                max-width: 100%;
+            }
+
+            .hero h1 {
+                font-size: clamp(34px, 12vw, 46px);
+                line-height: 1.08;
+                max-width: 100%;
+            }
+
+            .hero p {
+                font-size: 16px;
+                line-height: 1.45;
+                margin-bottom: 22px;
+            }
+
+            .hero-ctas {
+                width: 100%;
+                gap: 10px;
+            }
+
+            .hero-ctas .btn-primary,
+            .hero-ctas .btn-secondary {
+                width: 100%;
+                min-width: 0;
+                min-height: 48px;
+                padding: 12px 16px;
+                font-size: 16px;
+            }
+
+            .terminal-section {
+                padding: 0 12px 38px;
+            }
+
+            .terminal-body {
+                padding: 14px;
+                gap: 16px;
+            }
+
+            .terminal-bar {
+                padding: 9px 10px;
+                gap: 8px;
+            }
+
+            .terminal-title,
+            .terminal-legend {
+                display: none;
+            }
+
+            .chart-container {
+                height: 180px;
+            }
+
+            .deep-dive {
+                max-height: 230px;
+                padding: 12px;
+                font-size: 12px;
+            }
+
+            section,
+            .feature-showcase,
+            .demo-section.compact-demo {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .feature-showcase .viz-frame,
+            .feature-showcase .semantic-panel {
+                min-height: 0;
+                padding: 14px;
+            }
+
+            .feature-showcase .feat-title,
+            .semantic-showcase .feat-title {
+                font-size: 28px;
+            }
+
+            .feature-showcase .feat-desc,
+            .feature-showcase .feat-checks li {
+                font-size: 15px;
+            }
+
+            .semantic-showcase .sp-text {
+                padding: 12px;
+                font-size: 11px;
+            }
+
+            .bias-card-row {
+                grid-template-columns: 1fr;
+            }
+
+            .semantic-callout {
+                padding: 14px;
+                gap: 12px;
+            }
+
+            .compact-demo .demo-card h2 {
+                font-size: 23px;
+                line-height: 1.15;
+            }
+
+            .compact-demo .demo-card p {
+                font-size: 13px;
+            }
+
+            .compact-demo .demo-textarea {
+                min-height: 158px;
+                font-size: 12px;
+            }
+
+            .compact-demo .demo-actions {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .compact-demo .btn-primary,
+            .compact-demo .btn-secondary {
+                width: 100%;
+                padding: 10px 8px;
+            }
+
+            .demo-archive {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .archive-label {
+                grid-column: 1 / -1;
+            }
+
+            .archive-chip {
+                min-width: 0;
+                width: 100%;
+                padding: 10px 7px;
+                font-size: 12px;
+            }
+
+            .expand-btn {
+                width: 100%;
+            }
+
+            .detail-card {
+                padding: 12px;
+            }
+
+            .detail-chart {
+                height: 220px;
+            }
+
+            .semantic-demo-output,
+            .compact-demo .fake-output {
+                font-size: 11px;
+                line-height: 1.65;
+                padding: 12px;
+            }
+
+            footer {
+                padding: 24px 14px;
+                align-items: flex-start;
+            }
+
+            .footer-links {
+                width: 100%;
+                gap: 16px 22px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .hero {
+                padding-top: 70px;
+            }
+
+            .status-badge {
+                font-size: 10px;
+                letter-spacing: 1px;
+            }
+
+            .hero h1 {
+                font-size: clamp(31px, 11.5vw, 39px);
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            .hero-ctas .btn-primary,
+            .hero-ctas .btn-secondary {
+                min-height: 46px;
+                font-size: 15px;
+            }
+
+            .demo-archive {
+                grid-template-columns: 1fr;
+            }
+
+            .compact-demo .demo-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-showcase .feat-title,
+            .semantic-showcase .feat-title {
+                font-size: 25px;
+            }
+
+            .chart-container,
+            .detail-chart {
+                height: 200px;
+            }
+        }
+
         .model-output-body {
             padding: 28px;
             display: grid;
