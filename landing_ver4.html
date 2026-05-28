@@ -10,6 +10,17 @@
         href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('aifed-theme') === 'light') {
+                    document.documentElement.classList.add('theme-light-pending');
+                }
+            } catch (error) {
+                // Theme persistence is optional.
+            }
+        })();
+    </script>
     <style>
         *,
         *::before,
@@ -49,6 +60,29 @@
             font-size: 16px;
             line-height: 1.6;
             overflow-x: hidden;
+        }
+
+        html.theme-light-pending body,
+        body.theme-light {
+            --bg: #f7f9fc;
+            --bg2: #ffffff;
+            --bg3: #eef4ff;
+            --bg4: #e6efff;
+            --surface: #ffffff;
+            --surface2: #f2f6fb;
+            --blue: #2563eb;
+            --blue-light: #3182f6;
+            --blue-glow: rgba(49, 130, 246, 0.13);
+            --green: #16a34a;
+            --yellow: #f59e0b;
+            --text: #162033;
+            --text2: #536174;
+            --text3: #8a96a8;
+            --border: rgba(15, 23, 42, 0.09);
+            --border2: rgba(49, 130, 246, 0.22);
+            background:
+                radial-gradient(circle at 50% 0%, rgba(49, 130, 246, 0.12), transparent 30%),
+                linear-gradient(180deg, #ffffff 0%, #f7f9fc 42%, #eef4ff 100%);
         }
 
         nav {
@@ -116,6 +150,58 @@
         .btn-demo:hover {
             background: var(--blue-light);
             transform: translateY(-1px);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: var(--border2);
+            transform: translateY(-1px);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .theme-toggle .icon-sun {
+            display: block;
+        }
+
+        .theme-toggle .icon-moon {
+            display: none;
+        }
+
+        body.theme-light .theme-toggle .icon-sun {
+            display: none;
+        }
+
+        body.theme-light .theme-toggle .icon-moon {
+            display: block;
         }
 
         .hero {
@@ -1777,6 +1863,20 @@
                 font-size: 11px;
             }
 
+            .nav-actions {
+                gap: 6px;
+            }
+
+            .theme-toggle {
+                width: 34px;
+                height: 34px;
+            }
+
+            .theme-toggle svg {
+                width: 15px;
+                height: 15px;
+            }
+
             .hero {
                 min-height: auto;
                 padding: 76px 14px 34px;
@@ -2060,6 +2160,171 @@
             font-weight: 600;
             margin-top: 18px;
         }
+
+        body.theme-light nav {
+            background: rgba(255, 255, 255, 0.88);
+            border-bottom-color: rgba(15, 23, 42, 0.08);
+            box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+        }
+
+        body.theme-light .theme-toggle {
+            background: #ffffff;
+            color: #334155;
+            border-color: rgba(15, 23, 42, 0.11);
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+        }
+
+        body.theme-light .hero::before {
+            background: radial-gradient(ellipse at center, rgba(49, 130, 246, 0.13) 0%, transparent 68%);
+        }
+
+        body.theme-light .status-badge {
+            background: rgba(49, 130, 246, 0.08);
+            border-color: rgba(49, 130, 246, 0.16);
+            color: #35506d;
+        }
+
+        body.theme-light .hero h1,
+        body.theme-light .feat-title,
+        body.theme-light .demo-card h2,
+        body.theme-light .section-title,
+        body.theme-light .viz-card-title,
+        body.theme-light .terminal-title,
+        body.theme-light .reason-conclusion {
+            color: #162033;
+        }
+
+        body.theme-light .hero h1 span,
+        body.theme-light .nav-logo,
+        body.theme-light .nav-links a.active,
+        body.theme-light .feat-tag,
+        body.theme-light .viz-card-tag,
+        body.theme-light .t-raise,
+        body.theme-light .t-dive,
+        body.theme-light .lc-raise {
+            color: var(--blue);
+        }
+
+        body.theme-light .hero p,
+        body.theme-light .feat-desc,
+        body.theme-light .section-subtitle {
+            color: #4f5f72;
+        }
+
+        body.theme-light .btn-primary {
+            background: #3182f6;
+            color: #ffffff;
+            box-shadow: 0 14px 32px rgba(49, 130, 246, 0.22);
+        }
+
+        body.theme-light .btn-primary:hover,
+        body.theme-light .btn-demo:hover {
+            background: #1b64da;
+        }
+
+        body.theme-light .btn-secondary {
+            background: #ffffff;
+            color: #1c2b43;
+            border-color: rgba(15, 23, 42, 0.12);
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+        }
+
+        body.theme-light .btn-secondary:hover {
+            background: #f4f8ff;
+            border-color: rgba(49, 130, 246, 0.22);
+        }
+
+        body.theme-light .terminal-section,
+        body.theme-light .feature-showcase,
+        body.theme-light .demo-section,
+        body.theme-light .compact-demo {
+            background:
+                radial-gradient(circle at 12% 18%, rgba(49, 130, 246, 0.08), transparent 30%),
+                transparent;
+        }
+
+        body.theme-light .terminal-window,
+        body.theme-light .viz-frame,
+        body.theme-light .semantic-panel,
+        body.theme-light .demo-card,
+        body.theme-light .detail-card,
+        body.theme-light .result-card,
+        body.theme-light .reason-card,
+        body.theme-light .bias-card,
+        body.theme-light .semantic-callout {
+            background: rgba(255, 255, 255, 0.94);
+            border-color: rgba(15, 23, 42, 0.08);
+            box-shadow: 0 22px 54px rgba(15, 23, 42, 0.08);
+        }
+
+        body.theme-light .terminal-bar,
+        body.theme-light .terminal-body,
+        body.theme-light .t-panel,
+        body.theme-light .chart-container,
+        body.theme-light .deep-dive,
+        body.theme-light .sp-body,
+        body.theme-light .demo-input-wrap,
+        body.theme-light .fake-output,
+        body.theme-light .analysis-details,
+        body.theme-light .detail-chart,
+        body.theme-light .detail-output,
+        body.theme-light .confidence-bar,
+        body.theme-light .code-chip,
+        body.theme-light .metric-card {
+            background: #f7f9fc;
+            border-color: rgba(15, 23, 42, 0.08);
+            color: var(--text2);
+        }
+
+        body.theme-light .viz-frame {
+            background:
+                radial-gradient(circle at 85% 20%, rgba(49, 130, 246, 0.1), transparent 36%),
+                #ffffff;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.09);
+        }
+
+        body.theme-light .demo-textarea {
+            background: #ffffff;
+            border-color: rgba(15, 23, 42, 0.12);
+            color: var(--text);
+        }
+
+        body.theme-light .archive-chip,
+        body.theme-light .expand-btn {
+            background: #ffffff;
+            border-color: rgba(15, 23, 42, 0.1);
+            color: #344256;
+        }
+
+        body.theme-light .archive-chip.active,
+        body.theme-light .archive-chip:hover,
+        body.theme-light .expand-btn:hover {
+            background: rgba(49, 130, 246, 0.1);
+            border-color: rgba(49, 130, 246, 0.22);
+            color: var(--blue);
+        }
+
+        body.theme-light .hl-blue,
+        body.theme-light .hl-neutral {
+            background: rgba(49, 130, 246, 0.13);
+            color: #174ea6;
+        }
+
+        body.theme-light .hl-yellow {
+            background: rgba(245, 158, 11, 0.16);
+            color: #8a5200;
+        }
+
+        body.theme-light .hl-green {
+            background: rgba(22, 163, 74, 0.14);
+            color: #166534;
+        }
+
+        body.theme-light footer,
+        body.theme-light .footer {
+            background: #ffffff;
+            border-top-color: rgba(15, 23, 42, 0.08);
+        }
     </style>
 </head>
 
@@ -2070,8 +2335,27 @@
         <div class="nav-links">
             <a href="#Overview" class="active">Overview</a>
         </div>
-        <button class="btn-demo"
-            onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Demo</button>
+        <div class="nav-actions">
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light mode"
+                title="Toggle theme">
+                <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20.99 12.43A8.5 8.5 0 1 1 11.57 3a6.7 6.7 0 0 0 9.42 9.43Z"></path>
+                </svg>
+            </button>
+            <button class="btn-demo"
+                onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Demo</button>
+        </div>
     </nav>
 
     <section class="hero">
@@ -2484,7 +2768,7 @@
             return 0.40 + (i - 62) * 0.018 + Math.sin(i * 0.19) * 0.06;
         });
 
-        new Chart(document.getElementById('candleChart'), {
+        const candleChart = new Chart(document.getElementById('candleChart'), {
             type: 'line',
             data: {
                 labels: featureLabels,
@@ -2540,10 +2824,62 @@
         const demoTokenCount = document.getElementById('tokenCount');
         const analysisDetails = document.getElementById('analysisDetails');
         const expandAnalysis = document.getElementById('expandAnalysis');
+        const themeToggle = document.getElementById('themeToggle');
         let demoDetailChart;
         let demoDetailAnimationFrame;
         let demoDetailRestartTimeout;
         let activeDemoKey = 'apr2026';
+
+        function isLightTheme() {
+            return document.body.classList.contains('theme-light');
+        }
+
+        function applyChartTheme(chart) {
+            if (!chart) return;
+            const light = isLightTheme();
+            const gridColor = light ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.05)';
+            const tickColor = light ? '#64748b' : '#64748b';
+
+            Object.values(chart.options.scales || {}).forEach(scale => {
+                if (scale.grid) scale.grid.color = gridColor;
+                if (scale.ticks) scale.ticks.color = tickColor;
+                if (scale.title) scale.title.color = tickColor;
+            });
+
+            chart.update('none');
+        }
+
+        function refreshChartsForTheme() {
+            applyChartTheme(logitChart);
+            applyChartTheme(candleChart);
+            applyChartTheme(demoDetailChart);
+        }
+
+        function setTheme(theme) {
+            const light = theme === 'light';
+            document.body.classList.toggle('theme-light', light);
+            document.documentElement.classList.remove('theme-light-pending');
+            themeToggle.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
+            themeToggle.setAttribute('aria-pressed', String(light));
+            try {
+                localStorage.setItem('aifed-theme', light ? 'light' : 'dark');
+            } catch (error) {
+                // Theme persistence is optional.
+            }
+            refreshChartsForTheme();
+        }
+
+        function getStoredTheme() {
+            try {
+                return localStorage.getItem('aifed-theme') === 'light' ? 'light' : 'dark';
+            } catch (error) {
+                return 'dark';
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setTheme(isLightTheme() ? 'dark' : 'light');
+        });
 
         function countWords(text) {
             const trimmed = text.trim();
@@ -2767,6 +3103,7 @@
                 demoDetailChart.data.datasets[0].data = raiseData;
                 demoDetailChart.data.datasets[1].data = holdData;
                 demoDetailChart.data.datasets[2].data = cutData;
+                applyChartTheme(demoDetailChart);
                 demoDetailChart.update("none");
                 demoDetailChart.resize();
                 if (animate) {
@@ -2805,6 +3142,7 @@
                     }
                 }
             });
+            applyChartTheme(demoDetailChart);
             if (animate) {
                 animateDemoDetailChart(trajectory);
             }
@@ -2995,6 +3333,7 @@
                 stopDemoDetailAnimation();
             }
         });
+        setTheme(getStoredTheme());
         statementInput.value = demoSamples.base;
         updateDemoTokenCount();
 
